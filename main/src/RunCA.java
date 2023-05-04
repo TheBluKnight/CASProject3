@@ -7,7 +7,7 @@ public class RunCA extends Thread{
     final String ID;
 
     public void run(){
-        BoardHandler.exportBoard(this.Run(),this.board.length,this.ID);
+        BoardHandler.exportBoard(this.Run(),this.board.length,this.ID,this.ruleSet);
     }
 
     public RunCA(int neighborhoodSize,int duration,

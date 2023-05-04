@@ -1,14 +1,14 @@
 public class Rule {
     private boolean[] myRule;
     private int fitness;
+    private final int ID;
 
-    public Rule(boolean[] rule){
+    public Rule(boolean[] rule, int ID){
         this.myRule = rule;
+        this.ID = ID;
     }
     public void setFitness(int fitness){
-        if (this.fitness == 0){
-            this.fitness = fitness;
-        }
+        this.fitness = fitness;
     }
 
     public int getFitness(){
@@ -18,5 +18,6 @@ public class Rule {
     public boolean[] getMyRule(){
         return this.myRule;
     }
+    public int getID(){return this.ID;}
 
 }

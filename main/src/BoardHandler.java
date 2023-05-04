@@ -2,6 +2,7 @@
  * This class is for generally dealing with boards used in the CA
  */
 
+import java.util.Arrays;
 import java.util.Random;
 import java.io.*;
 import java.util.Scanner;
@@ -37,12 +38,21 @@ public class BoardHandler {
      * @param size The size of the board
      * @param name The name of the file containing the board the .txt is added by this method
      */
-    public static void exportBoard(boolean[][] board, int size,String name){
+    public static void exportBoard(boolean[][] board, int size,String name,boolean[] rule){
         FileWriter out;
         int ones = 0;
         int zeros = 0;
+        int[] binaryRule = new int[rule.length];
         try {
             out = new FileWriter(name+".txt");
+            for (int i = 0; i < rule.length; i++) {
+                if (rule[i]){
+                    binaryRule[i] = 1;
+                }else {
+                    binaryRule[i] = 0;
+                }
+            }
+            out.write(Arrays.toString(binaryRule)+"\n");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if(board[i][j]){
@@ -138,23 +148,19 @@ public class BoardHandler {
 
     }
 
-    public boolean getDominant(boolean[][] board){
+    public static boolean getDominant(boolean[][] board){
         int Ones = 0;
         int Zeros = 0;
-        for (int i = 0; i < board.length; i++) {
+        for (boolean[] booleans : board) {
             for (int j = 0; j < board.length; j++) {
-                if (board[i][j]){
+                if (booleans[j]) {
                     Ones++;
-                }else {
+                } else {
                     Zeros++;
                 }
             }
         }
-        if (Ones > Zeros){
-            return true;
-        }else {
-            return false;
-        }
+        return Ones > Zeros;
     }
 
 }
