@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
@@ -9,6 +11,7 @@ public class GeneticAlorithm {
         long start = System.currentTimeMillis();
         //TODO move some variables to be in args if you want
         int durationToBeTested = 300;
+        int generationsToBeTested = 3;
         int radius = 1;
         boolean[][] defaultBoard;
         int ruleSize = (int)Math.pow(2,((Math.pow((1+2*radius),2)-1)));
@@ -30,13 +33,15 @@ public class GeneticAlorithm {
         for (int i = 0; i < rules.length; i++) {
             RunCA CA = new RunCA(radius,durationToBeTested,defaultBoard,rules[i].getMyRule(),rules[i].getID()+"");
 ////            System.out.println(Arrays.toString(rules[i].getMyRule()));
-//            CA.start();
+            CA.start();
         }
+
         try {
-            Thread.sleep(1000);
+            Thread.sleep(500);
         }catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         for (int i = 0; i < rules.length; i++) {
 
             rules[i].setFitness(getFitness(i+""));
@@ -44,18 +49,84 @@ public class GeneticAlorithm {
         }
 
         leaderBoard = leaderBoard(rules,leaderBoard,boardDom);
-
 //        for (int i = 0; i < leaderBoard.length; i++) {
-//            System.out.println("LeaderBoard position " + i + " fitness: " + leaderBoard[i].getFitness() +
-//                    " RuleID: " + leaderBoard[i].getID());
+//            System.out.println("Ho");
+//            System.out.println("Leader at pos: "+ i + " has ID " + leaderBoard[i].getID() + " and fitness " +
+//                    leaderBoard[i].getFitness());
 //        }
 
 
-//        System.out.println("Fitness of " + 2 + " is " + getFitness(2 + ""));
-//        System.out.println("Correct? " +
-//                correctOutcome(true,2+""));
+        for (int j = 0; j < generationsToBeTested; j++) {
+            System.out.println("Heyyooo");
+            System.out.println(j);
+            System.out.println(generationsToBeTested);
+
+            for (int i = 0; i < leaderBoard.length; i++) {
+                rules[i] = mutate(leaderBoard[i], IDs);
+
+                IDs++;
+                boolean notProvenDiff = true;
+                Rule secMut = mutate(leaderBoard[i], IDs);
+
+                while (notProvenDiff) {
+                    if (Arrays.equals(rules[i].getMyRule(), secMut.getMyRule())) {
+                        secMut = mutate(leaderBoard[i], IDs);
+                    } else {
+                        notProvenDiff = false;
+                    }
+                }
+                rules[rules.length - 1 - i] = secMut;
+                IDs++;
+                RunCA newGen = new RunCA(radius, durationToBeTested, defaultBoard, rules[i].getMyRule(), rules[i].getID() + "");
+                newGen.start();
+                newGen = new RunCA(radius, durationToBeTested, defaultBoard, rules[rules.length - 1 - i].getMyRule(),
+                        rules[rules.length - 1 - i].getID() + "");
+                newGen.start();
+
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            for (int i = 0; i < rules.length; i++) {
+
+                rules[i].setFitness(getFitness(i + ""));
+//            System.out.println(rules[i].getFitness() + " fitness of " + i);
+            }
+
+            leaderBoard = leaderBoard(rules, leaderBoard, boardDom);
+        }
+        for (int i = 0; i < leaderBoard.length; i++) {
+            System.out.println("ho");
+            System.out.println("Leader at pos: " + i + " has ID " + leaderBoard[i].getID() + " and fitness " +
+                    leaderBoard[i].getFitness());
+        }
+
+
+
+        try{
+            FileWriter out = new FileWriter(new File("Leaderboard.txt"));
+            for (int i = 0; i < leaderBoard.length; i++) {
+                out.write("Leaderboard Position: " + (i+1) + " is rule: "+ leaderBoard[i].getID() + " with fitness "
+                        + leaderBoard[i].getFitness() + "\n") ;
+                out.write("Rule-set is " + Arrays.toString(leaderBoard[i].getMyRule()) + "\n\n");
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         long end = System.currentTimeMillis();
         System.out.println("Time Elapsed: " + (end - start));
+    }
+
+
+    public static Rule mutate(Rule parent,int ID){
+        Random randomIndex = new Random();
+        int index = randomIndex.nextInt(parent.getMyRule().length);
+        boolean[] parentsRule = parent.getMyRule().clone();
+        parentsRule[index] = !parentsRule[index];
+        return new Rule(parentsRule,ID);
     }
 
 
@@ -79,8 +150,8 @@ public class GeneticAlorithm {
             }
             for (int i = 0; i < currentLeaders.length; i++) {
                 if(rule.getFitness() > currentLeaders[i].getFitness()){
-                    System.out.println(rule.getFitness() +" "+ rule.getID() + " newgen and currentGen "+
-                            currentLeaders[i].getFitness()+ " " + currentLeaders[i].getID());
+//                    System.out.println(rule.getFitness() +" "+ rule.getID() + " newgen and currentGen "+
+//                            currentLeaders[i].getFitness()+ " " + currentLeaders[i].getID());
 
                     //
                     System.arraycopy(currentLeaders,i,currentLeaders,i+1,currentLeaders.length-i-1);
@@ -92,10 +163,10 @@ public class GeneticAlorithm {
             }
         }
 
-        for (int i = 0; i < currentLeaders.length; i++) {
-            System.out.println("LeaderBoard position " + i + " fitness: " + currentLeaders[i].getFitness() +
-                    " RuleID: " + currentLeaders[i].getID());
-        }
+//        for (int i = 0; i < currentLeaders.length; i++) {
+//            System.out.println("LeaderBoard position " + i + " fitness: " + currentLeaders[i].getFitness() +
+//                    " RuleID: " + currentLeaders[i].getID());
+//        }
         return currentLeaders;
     }
     private static Rule[] generateInitial(Rule[] rules,int ruleSize,int IDStart,Rule[] leaderBoard){
@@ -145,7 +216,8 @@ public class GeneticAlorithm {
      */
     private static int getFitness(String name){
         try {
-            Scanner scanner = new Scanner(new File(name + ".txt"));
+            Scanner scanner = new Scanner(new File("C:\\Users\\nicob\\IdeaProjects\\CASProject3\\CATables\\"
+                    +name + ".txt"));
             String line;
             String[] row;
             while(scanner.hasNextLine()){
@@ -172,7 +244,8 @@ public class GeneticAlorithm {
      */
     private static int correctOutcome(boolean boardDom, String fileName){
         try {
-            Scanner scanner = new Scanner(new File(fileName + ".txt"));
+            Scanner scanner = new Scanner(new File("C:\\Users\\nicob\\IdeaProjects\\CASProject3\\CATables\\"
+                    + fileName + ".txt"));
             String line;
             String[] row;
             while (scanner.hasNextLine()){

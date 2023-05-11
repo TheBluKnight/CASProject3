@@ -44,7 +44,8 @@ public class BoardHandler {
         int zeros = 0;
         int[] binaryRule = new int[rule.length];
         try {
-            out = new FileWriter(name+".txt");
+
+            out = new FileWriter(new File("CATables",name+".txt"));
             for (int i = 0; i < rule.length; i++) {
                 if (rule[i]){
                     binaryRule[i] = 1;
