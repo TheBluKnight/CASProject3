@@ -1,3 +1,7 @@
+/**
+ * Genetic
+ */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -17,9 +21,8 @@ public class GeneticAlorithm {
         int ruleSize = (int)Math.pow(2,((Math.pow((1+2*radius),2)-1)));
         boolean boardDom; // The dominant value in the board -- True for mostly Ones / False for mostly zeros
         Rule[] rules = new Rule[100];
-       /// int[] fitnessScores = new int[rules.length];
         Rule[] leaderBoard = new Rule[50];
-        //IDs is the rule ID counterit should be updated after every rule generation
+        //IDs is the rule ID counter, it should be updated after every rule generation
         int IDs = 0;
 
 
@@ -28,11 +31,9 @@ public class GeneticAlorithm {
 
         defaultBoard = BoardHandler.getBoard("10x10Good");
         boardDom = BoardHandler.getDominant(defaultBoard);
-        //System.out.println(boardDom + " boardDom");
 
         for (int i = 0; i < rules.length; i++) {
             RunCA CA = new RunCA(radius,durationToBeTested,defaultBoard,rules[i].getMyRule(),rules[i].getID()+"");
-////            System.out.println(Arrays.toString(rules[i].getMyRule()));
             CA.start();
         }
 
@@ -45,21 +46,12 @@ public class GeneticAlorithm {
         for (int i = 0; i < rules.length; i++) {
 
             rules[i].setFitness(getFitness(i+""));
-//            System.out.println(rules[i].getFitness() + " fitness of " + i);
         }
 
         leaderBoard = leaderBoard(rules,leaderBoard,boardDom);
-//        for (int i = 0; i < leaderBoard.length; i++) {
-//            System.out.println("Ho");
-//            System.out.println("Leader at pos: "+ i + " has ID " + leaderBoard[i].getID() + " and fitness " +
-//                    leaderBoard[i].getFitness());
-//        }
 
 
         for (int j = 0; j < generationsToBeTested; j++) {
-            System.out.println("Heyyooo");
-            System.out.println(j);
-            System.out.println(generationsToBeTested);
 
             for (int i = 0; i < leaderBoard.length; i++) {
                 rules[i] = mutate(leaderBoard[i], IDs);
@@ -92,13 +84,11 @@ public class GeneticAlorithm {
             for (int i = 0; i < rules.length; i++) {
 
                 rules[i].setFitness(getFitness(i + ""));
-//            System.out.println(rules[i].getFitness() + " fitness of " + i);
             }
 
             leaderBoard = leaderBoard(rules, leaderBoard, boardDom);
         }
         for (int i = 0; i < leaderBoard.length; i++) {
-            System.out.println("ho");
             System.out.println("Leader at pos: " + i + " has ID " + leaderBoard[i].getID() + " and fitness " +
                     leaderBoard[i].getFitness());
         }
@@ -106,7 +96,7 @@ public class GeneticAlorithm {
 
 
         try{
-            FileWriter out = new FileWriter(new File("Leaderboard.txt"));
+            FileWriter out = new FileWriter("Leaderboard.txt");
             for (int i = 0; i < leaderBoard.length; i++) {
                 out.write("Leaderboard Position: " + (i+1) + " is rule: "+ leaderBoard[i].getID() + " with fitness "
                         + leaderBoard[i].getFitness() + "\n") ;
@@ -121,6 +111,13 @@ public class GeneticAlorithm {
     }
 
 
+    /**
+     * This method generates a new rule by taking one as an input and switching the values of a random index in the
+     * inputs rule-set
+     * @param parent The rule that will be used as a basis to mutate
+     * @param ID The ID that the new rule will have
+     * @return A new rule with a single value switched from the parent and a new ID number
+     */
     public static Rule mutate(Rule parent,int ID){
         Random randomIndex = new Random();
         int index = randomIndex.nextInt(parent.getMyRule().length);
@@ -131,7 +128,7 @@ public class GeneticAlorithm {
 
 
     /**
-     * This function fills and updates the leaderboard, it can be used bot if the leaderBoard is empty or full
+     * This function fills and updates the leaderboard, it can be used whether the leaderBoard is empty or full
      * @param newGeneration The new set of rules to be examined for a place on the leaderboard
      * @param currentLeaders The current leaderboard that may be updated in this function
      * @return The new updated leaderboard
@@ -150,10 +147,6 @@ public class GeneticAlorithm {
             }
             for (int i = 0; i < currentLeaders.length; i++) {
                 if(rule.getFitness() > currentLeaders[i].getFitness()){
-//                    System.out.println(rule.getFitness() +" "+ rule.getID() + " newgen and currentGen "+
-//                            currentLeaders[i].getFitness()+ " " + currentLeaders[i].getID());
-
-                    //
                     System.arraycopy(currentLeaders,i,currentLeaders,i+1,currentLeaders.length-i-1);
                     currentLeaders[i] = rule;
 
@@ -162,13 +155,17 @@ public class GeneticAlorithm {
                 }
             }
         }
-
-//        for (int i = 0; i < currentLeaders.length; i++) {
-//            System.out.println("LeaderBoard position " + i + " fitness: " + currentLeaders[i].getFitness() +
-//                    " RuleID: " + currentLeaders[i].getID());
-//        }
         return currentLeaders;
     }
+
+    /**
+     * Randomly generates rule-sets to be evolved as the program runs
+     * @param rules The array of rules that will be run and analyzed
+     * @param ruleSize The size of the rule-sets for this CA
+     * @param IDStart The starting point of the IDS to be assigned to the newly generated rules
+     * @param leaderBoard The leaderboard this is just for checking if a rule has previously been generated already
+     * @return The array of newly generated rules.
+     */
     private static Rule[] generateInitial(Rule[] rules,int ruleSize,int IDStart,Rule[] leaderBoard){
         Random coinFlip = new Random();
         Rule[] newRules = new Rule[rules.length];
@@ -266,21 +263,4 @@ public class GeneticAlorithm {
         }
         return -1;
     }
-//Pretty sure this wasn't needed but leaving it just in case
-//    /**
-//     * Checks if the two boolean arrays in a pair of rules is the same used for rule generation
-//     * @param ruleOne The rule already in the rule-set
-//     * @param ruleTwo The rule being check to be added --- Note: the order of these two parameters does not matter
-//     * @return True: The Rules are different / False: The pair of rules is identical
-//     */
-//    private boolean checkIfAlreadyUsed(Rule ruleOne, Rule ruleTwo){
-//        boolean[] ruleSetOne = ruleOne.getMyRule();
-//        boolean[] ruleSetTwo = ruleTwo.getMyRule();
-//        for (int i = 0; i < ruleSetOne.length; i++) {
-//            if (ruleSetOne[i] != ruleSetTwo[i]){
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 }

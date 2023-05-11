@@ -1,5 +1,6 @@
 /** Dominic Larranaga  BoardHandler.java
- * This class is for generally dealing with boards used in the CA
+ * This class is for generally dealing with boards used in the CA such as making them, retrieving one from a file, or
+ * writing the outcome board from a rule-set to a file.
  */
 
 import java.util.Arrays;
@@ -26,8 +27,6 @@ public class BoardHandler {
             }
         }
 
-//        printBoard(board);
-//        exportBoard(board,size,"firstTest");
 
         return board;
     }
@@ -149,6 +148,11 @@ public class BoardHandler {
 
     }
 
+    /**
+     * Iterates through a board and figures out if the majority of values are zeros or ones
+     * @param board The binary board you would like to analyze
+     * @return boolean: True meaning the majority are ones / False meaning the majority are zeros
+     */
     public static boolean getDominant(boolean[][] board){
         int Ones = 0;
         int Zeros = 0;
