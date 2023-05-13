@@ -8,6 +8,7 @@ public class RunCA extends Thread{
     int neighborhoodSize; //Radius around a cell that will be looked at for updating
     int duration; //max cycle count
     boolean[][] board; //The board the CA runs on
+    final boolean[][] defaultBoard;
     boolean[] ruleSet; //The ruleset being applied
     final String ID;
 
@@ -16,7 +17,7 @@ public class RunCA extends Thread{
      * results to get exported
      */
     public void run(){
-        BoardHandler.exportBoard(this.Run(),this.board.length,this.ID,this.ruleSet);
+        BoardHandler.exportBoard(this.Run(),this.board.length,this.ID,this.ruleSet,this.defaultBoard);
     }
 
     /**
@@ -32,6 +33,7 @@ public class RunCA extends Thread{
         this.neighborhoodSize = neighborhoodSize;
         this.duration = duration;
         this.board = board;
+        this.defaultBoard = board;
         this.ruleSet = ruleSet;
         this.ID = id;
 
@@ -54,6 +56,10 @@ public class RunCA extends Thread{
                 }
             }
             this.board = editingBoard;
+//             BoardHandler.exportBoard(this.board,100,""+this.ID+"-"+cycleNum,this.ruleSet,this.defaultBoard);
+//            BoardHandler.printBoard(this.board);
+// Only uncomment for single board running
+            //   or else be flooded  with print statements
             cycleNum++;
         }
         return this.board;

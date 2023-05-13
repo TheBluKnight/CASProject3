@@ -37,7 +37,7 @@ public class BoardHandler {
      * @param size The size of the board
      * @param name The name of the file containing the board the .txt is added by this method
      */
-    public static void exportBoard(boolean[][] board, int size,String name,boolean[] rule){
+    public static void exportBoard(boolean[][] board, int size,String name,boolean[] rule,boolean[][] defaultBoard){
         FileWriter out;
         int ones = 0;
         int zeros = 0;
@@ -75,10 +75,12 @@ public class BoardHandler {
                 out.write("No\n");
             }
             out.write("Fitness: ");
-            if (ones > zeros){
+            if (ones > zeros && getDominant(defaultBoard)){
                 out.write(ones+"");
-            }else {
+            }else if (ones < zeros && !getDominant(defaultBoard)){
                 out.write(zeros+"");
+            } else {
+                out.write("0");
             }
             out.close();
         } catch (IOException e) {
@@ -126,6 +128,7 @@ public class BoardHandler {
      * Just for printing any boolean board to console
      * @param board The board you want to print
      */
+    //WARNING: Don't use in large tests this has a lot of print statements just use for looking at a single CA
     public static void printBoard(boolean[][] board){
         int numZeros = 0;
         int numOnes = 0;

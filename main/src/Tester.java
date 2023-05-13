@@ -1,4 +1,8 @@
-import java.lang.Math;
+/**
+ * This is just a tester class for trying out different parts of the program independently, probably shouldn't make
+ * it onto github
+ */
+
 import java.util.Arrays;
 
 /**Dominic Larranaga RunCA.java
@@ -81,19 +85,38 @@ public class Tester {
 ////            }
 ////            System.out.println();
 ////        }
+        boolean[] ruleSet = {false, true, false, true, false, false, false, false, false, false, false, true, true, false,
+                false, false, false, true, true, false, false, false, false, false, true, false, false, false, false,
+                true, false, true, false, false, false, false, false, true, true, false, false, true, true, true, false,
+                true, false, true, false, false, true, false, true, false, true, false, true, false, false, false,
+                false, true, false, false, false, false, true, false, true, true, true, true, true, true, false, false,
+                false, false, false, false, false, true, true, false, true, false, true, false, true, false, true,
+                false, true, true, false, true, false, false, false, false, true, false, true, false, true, true, true,
+                true, false, true, true, true, false, true, true, false, true, true, true, false, true, false, true,
+                false, false, true, true, true, false, false, true, false, true, false, false, false, false, true,
+                false, false, false, false, false, true, true, true, false, false, true, false, false, true, false,
+                true, false, false, false, true, true, true, false, false, false, true, false, true, true, false, true,
+                true, true, true, true, true, true, false, true, true, true, true, true, true, true, true, true, false,
+                false, false, true, true, false, true, false, false, true, false, false, false, true, true, false, true,
+                false, false, false, false, false, false, false, false, false, true, false, true, true, true, true,
+                true, false, false, false, true, false, true, false, false, false, true, false, false, false, true,
+                true, true, true, true, false, true, false, true, true, false, false, true, false, false, false, false,
+                false, false, false, false, false, true, false, false
+};
 
-        Rule testRule = new Rule(new boolean[]{true, false, true, false},1);
-        //System.out.println(Arrays.toString(GeneticAlorithm.mutate(testRule,2).getMyRule()));
-        Rule newRule = GeneticAlorithm.mutate(testRule,2);
-        System.out.println(Arrays.toString(testRule.getMyRule()));
-        System.out.println(Arrays.toString(newRule.getMyRule()));
-        boolean isEqual = true;
-        for (int i = 0; i < testRule.getMyRule().length; i++) {
-            if (testRule.getMyRule()[i] != newRule.getMyRule()[i]){
-                isEqual = false;
-            }
-        }
-        System.out.println("is equal " + isEqual);
+//        boolean[] testRuleset = new boolean[ruleSet.length];
+//        for (int i = 0; i < ruleSet.length; i++) {
+//            if(ruleSet[i] == 1){
+//                testRuleset[i] = true;
+//            }else {
+//                testRuleset[i] = false;
+//            }
+//        }
+//        System.out.println(Arrays.toString(BoardHandler.getBoard("100x100Ones")[1]));
+        RunCA testCA = new RunCA(1,3000,BoardHandler.getBoard("100x100Ones"),ruleSet,1+"-0");
+        testCA.start();
+
+
         long stop = System.currentTimeMillis();
         System.out.println("Elapsed time: " + (stop - start));
     }

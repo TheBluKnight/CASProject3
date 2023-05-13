@@ -9,19 +9,20 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.prefs.BackingStoreException;
 
 public class GeneticAlorithm {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         //TODO move some variables to be in args if you want
-        int durationToBeTested = 300;
-        int generationsToBeTested = 3;
+        int durationToBeTested = 100;
+        int generationsToBeTested = 300;
         int radius = 1;
         boolean[][] defaultBoard;
         int ruleSize = (int)Math.pow(2,((Math.pow((1+2*radius),2)-1)));
-        boolean boardDom; // The dominant value in the board -- True for mostly Ones / False for mostly zeros
+        //boolean boardDom; // The dominant value in the board -- True for mostly Ones / False for mostly zeros
         Rule[] rules = new Rule[100];
-        Rule[] leaderBoard = new Rule[50];
+        Rule[] leaderBoard = new Rule[100];
         //IDs is the rule ID counter, it should be updated after every rule generation
         int IDs = 0;
 
@@ -29,11 +30,12 @@ public class GeneticAlorithm {
         rules = generateInitial(rules,ruleSize,IDs,leaderBoard);
         IDs += rules.length;
 
-        defaultBoard = BoardHandler.getBoard("10x10Good");
-        boardDom = BoardHandler.getDominant(defaultBoard);
+        defaultBoard = BoardHandler.getBoard("First100");
 
         for (int i = 0; i < rules.length; i++) {
-            RunCA CA = new RunCA(radius,durationToBeTested,defaultBoard,rules[i].getMyRule(),rules[i].getID()+"");
+            RunCA CA = new RunCA(radius,durationToBeTested,defaultBoard,rules[i].getMyRule(),rules[i].getID()+"-0");
+            CA.start();
+            CA = new RunCA(radius,durationToBeTested,BoardHandler.getBoard("100x100Ones"),rules[i].getMyRule(),rules[i].getID()+"-1");
             CA.start();
         }
 
@@ -45,10 +47,11 @@ public class GeneticAlorithm {
 
         for (int i = 0; i < rules.length; i++) {
 
+            //rules[i].setFitness(getFitness(i+""));
             rules[i].setFitness(getFitness(i+""));
         }
 
-        leaderBoard = leaderBoard(rules,leaderBoard,boardDom);
+        leaderBoard(rules, leaderBoard);
 
 
         for (int j = 0; j < generationsToBeTested; j++) {
@@ -69,10 +72,17 @@ public class GeneticAlorithm {
                 }
                 rules[rules.length - 1 - i] = secMut;
                 IDs++;
-                RunCA newGen = new RunCA(radius, durationToBeTested, defaultBoard, rules[i].getMyRule(), rules[i].getID() + "");
+                RunCA newGen = new RunCA(radius, durationToBeTested, defaultBoard, rules[i].getMyRule(), rules[i].getID() + "-0");
                 newGen.start();
+
+                newGen = new RunCA(radius, durationToBeTested,BoardHandler.getBoard("100x100Ones"), rules[i].getMyRule(), rules[i].getID() + "-1");
+                newGen.start();
+
                 newGen = new RunCA(radius, durationToBeTested, defaultBoard, rules[rules.length - 1 - i].getMyRule(),
-                        rules[rules.length - 1 - i].getID() + "");
+                        rules[rules.length - 1 - i].getID() + "-0");
+                newGen.start();
+                newGen = new RunCA(radius, durationToBeTested,BoardHandler.getBoard("100x100Ones"), rules[rules.length - 1 - i].getMyRule(),
+                        rules[rules.length - 1 - i].getID() + "-1");
                 newGen.start();
 
             }
@@ -85,9 +95,31 @@ public class GeneticAlorithm {
 
                 rules[i].setFitness(getFitness(i + ""));
             }
-
-            leaderBoard = leaderBoard(rules, leaderBoard, boardDom);
+            for (Rule rule : leaderBoard) {
+                rule.setFitness(getFitness("" + rule.getID()));
+            }
+            leaderBoard(rules, leaderBoard);
         }
+
+
+//        for (Rule rule : leaderBoard) {
+//            rule.setFitness(getFitness("" + rule.getID()));
+//        }
+//        for (Rule rule:leaderBoard) {
+//            RunCA verifying = new RunCA(radius,durationToBeTested,BoardHandler.getBoard("100x100Ones"),rule.getMyRule(),rule.getID()+"");
+//            verifying.start();
+//        }
+//        try {
+//            Thread.sleep(50000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+        for (Rule rule : leaderBoard) {
+            rule.setFitness(getFitness("" + rule.getID()));
+        }
+        leaderBoard(rules, leaderBoard);
+
         for (int i = 0; i < leaderBoard.length; i++) {
             System.out.println("Leader at pos: " + i + " has ID " + leaderBoard[i].getID() + " and fitness " +
                     leaderBoard[i].getFitness());
@@ -133,25 +165,32 @@ public class GeneticAlorithm {
      * @param currentLeaders The current leaderboard that may be updated in this function
      * @return The new updated leaderboard
      */
-    private static Rule[] leaderBoard(Rule[] newGeneration, Rule[] currentLeaders,boolean boardDom){
+    private static Rule[] leaderBoard(Rule[] newGeneration, Rule[] currentLeaders){
+        Rule[] backupLeaderboard = currentLeaders.clone();
+        for (Rule rule : newGeneration) {
+            rule.setFitness(getFitness("" + rule.getID()));
+        }
         if (currentLeaders[0] == null){
-            for (int i = 0; i < currentLeaders.length; i++) {
-                currentLeaders[i] = newGeneration[i];
-            }
+            System.arraycopy(newGeneration, 0, currentLeaders, 0, currentLeaders.length);
+            return currentLeaders;
         }
 
 
         for (Rule rule:newGeneration) {
-            if(correctOutcome(boardDom,rule.getID() + "") == 1){
-                rule.setFitness((rule.getFitness()+100));
-            }
+//            if(correctOutcome(boardDom,rule.getID() + "") == 1){
+//                rule.setFitness((rule.getFitness()+100));
+//                System.out.println("WASSUP");
+//            }
             for (int i = 0; i < currentLeaders.length; i++) {
                 if(rule.getFitness() > currentLeaders[i].getFitness()){
-                    System.arraycopy(currentLeaders,i,currentLeaders,i+1,currentLeaders.length-i-1);
+//                    System.out.println("Swapping Leader a pos: "+i+" that has fitness: "+currentLeaders[i].getFitness() + " with ID: "+currentLeaders[i].getID());
+//                    System.out.println("With new Leader "+rule.getID()+" that has fitness: "+rule.getFitness());
                     currentLeaders[i] = rule;
-
+                    for (int j = i; j < currentLeaders.length-1; j++) {
+                        currentLeaders[j+1] = backupLeaderboard[j];
+                    }
+                    backupLeaderboard = currentLeaders.clone();
                     break;
-
                 }
             }
         }
@@ -211,23 +250,35 @@ public class GeneticAlorithm {
      * @param name The name of the CA output file to be examined
      * @return the int value of the fitness score
      */
-    private static int getFitness(String name){
+    public static int getFitness(String name){
+        int fitOne =0;
+        int fitTwo =0;
         try {
             Scanner scanner = new Scanner(new File("C:\\Users\\nicob\\IdeaProjects\\CASProject3\\CATables\\"
-                    +name + ".txt"));
+                    +name + "-0.txt"));
             String line;
             String[] row;
             while(scanner.hasNextLine()){
                 line = scanner.nextLine();
                 row = line.split(" ");
                 if (row[0].equals("Fitness:")){
-                    return Integer.parseInt(row[1]);
+                    fitOne = Integer.parseInt(row[1]);
+                }
+            }
+
+            scanner = new Scanner(new File("C:\\Users\\nicob\\IdeaProjects\\CASProject3\\CATables\\"
+                    +name + "-1.txt"));
+            while(scanner.hasNextLine()){
+                line = scanner.nextLine();
+                row = line.split(" ");
+                if (row[0].equals("Fitness:")){
+                    fitTwo = Integer.parseInt(row[1]);
                 }
             }
         }catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        return 0;
+        return (fitOne+fitTwo)/2;
     }
 
     /**
